@@ -35,10 +35,10 @@ class User(Base):
     computed_targets: Mapped["ComputedTargets"] = relationship(
         back_populates="user", uselist=False
     )
-    daily_logs: Mapped[list["DailyLog"]] = relationship(back_populates="user")
-    workouts: Mapped[list["Workout"]] = relationship(back_populates="user")
-    strength_logs: Mapped[list["StrengthLog"]] = relationship(back_populates="user")
-    calorie_entries: Mapped[list["CalorieEntry"]] = relationship(back_populates="user")
+    daily_logs: Mapped[List["DailyLog"]] = relationship(back_populates="user")
+    workouts: Mapped[List["Workout"]] = relationship(back_populates="user")
+    strength_logs: Mapped[List["StrengthLog"]] = relationship(back_populates="user")
+    calorie_entries: Mapped[List["CalorieEntry"]] = relationship(back_populates="user")
     settings: Mapped["Settings"] = relationship(back_populates="user", uselist=False)
 
 

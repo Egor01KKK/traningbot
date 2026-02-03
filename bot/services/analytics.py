@@ -39,17 +39,17 @@ class MonthlyStats:
 
 @dataclass
 class WeightTrend:
-    dates: list[date]
-    weights: list[Decimal]
-    moving_avg: list[Decimal]
+    dates: List[date]
+    weights: List[Decimal]
+    moving_avg: List[Decimal]
 
 
 @dataclass
 class ExerciseProgress:
     exercise_name: str
-    dates: list[date]
-    weights: list[Decimal]
-    e1rms: list[Decimal]
+    dates: List[date]
+    weights: List[Decimal]
+    e1rms: List[Decimal]
     max_weight: Decimal
     max_e1rm: Decimal
     initial_weight: Decimal

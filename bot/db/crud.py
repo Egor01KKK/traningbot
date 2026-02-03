@@ -35,7 +35,7 @@ async def create_user(
 
 async def get_or_create_user(
     session: AsyncSession, telegram_id: int, username: Optional[str] = None
-) -> tuple[User, bool]:
+) -> Tuple[User, bool]:
     user = await get_user_by_telegram_id(session, telegram_id)
     if user:
         return user, False
@@ -169,7 +169,7 @@ async def create_or_update_daily_log(
 
 async def get_daily_logs_range(
     session: AsyncSession, user_id: int, start_date: date, end_date: date
-) -> list[DailyLog]:
+) -> List[DailyLog]:
     result = await session.execute(
         select(DailyLog)
         .where(
@@ -247,7 +247,7 @@ async def get_total_calories_for_date(
 
 async def get_calorie_entries_for_date(
     session: AsyncSession, user_id: int, entry_date: date
-) -> list[CalorieEntry]:
+) -> List[CalorieEntry]:
     """Get all calorie entries for a specific date."""
     result = await session.execute(
         select(CalorieEntry)
@@ -285,7 +285,7 @@ async def create_workout(
 
 async def get_workouts_range(
     session: AsyncSession, user_id: int, start_date: date, end_date: date
-) -> list[Workout]:
+) -> List[Workout]:
     result = await session.execute(
         select(Workout)
         .where(
@@ -328,7 +328,7 @@ async def get_last_workout(session: AsyncSession, user_id: int) -> Optional[Work
 
 async def get_workouts_for_date(
     session: AsyncSession, user_id: int, workout_date: date
-) -> list[Workout]:
+) -> List[Workout]:
     """Get all workouts for a specific date."""
     result = await session.execute(
         select(Workout)
@@ -382,7 +382,7 @@ async def create_strength_log(
 
 async def get_strength_logs_by_exercise(
     session: AsyncSession, user_id: int, exercise_name: str, limit: int = 20
-) -> list[StrengthLog]:
+) -> List[StrengthLog]:
     result = await session.execute(
         select(StrengthLog)
         .where(
@@ -414,7 +414,7 @@ async def get_last_strength_log_for_exercise(
     return result.scalar_one_or_none()
 
 
-async def get_user_exercises(session: AsyncSession, user_id: int, limit: int = 10) -> list[str]:
+async def get_user_exercises(session: AsyncSession, user_id: int, limit: int = 10) -> List[str]:
     result = await session.execute(
         select(StrengthLog.exercise_name)
         .where(StrengthLog.user_id == user_id)
@@ -479,7 +479,7 @@ async def get_workout_streak(session: AsyncSession, user_id: int) -> int:
     return streak
 
 
-async def get_all_users_with_settings(session: AsyncSession) -> list[tuple[User, Settings]]:
+async def get_all_users_with_settings(session: AsyncSession) -> List[Tuple[User, Settings]]:
     """Get all active users with their settings for scheduler."""
     result = await session.execute(
         select(User, Settings)

@@ -1,3 +1,4 @@
+from typing import List
 from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
@@ -114,7 +115,7 @@ def get_confirm_keyboard() -> InlineKeyboardMarkup:
     )
 
 
-def get_exercises_keyboard(exercises: list[str]) -> InlineKeyboardMarkup:
+def get_exercises_keyboard(exercises: List[str]) -> InlineKeyboardMarkup:
     """Keyboard with user's recent exercises."""
     buttons = [
         [InlineKeyboardButton(text=ex, callback_data=f"exercise_{ex}")]

@@ -1,3 +1,4 @@
+from typing import List
 from aiogram import Router
 
 from bot.handlers.start import router as start_router
@@ -9,7 +10,7 @@ from bot.handlers.reports import router as reports_router
 from bot.handlers.settings import router as settings_router
 
 
-def get_all_routers() -> list[Router]:
+def get_all_routers() -> List[Router]:
     """Get all handler routers."""
     return [
         start_router,

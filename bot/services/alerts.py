@@ -17,7 +17,7 @@ class Alert:
 async def check_alerts(
     session: AsyncSession,
     user_id: int,
-) -> list[Alert]:
+) -> List[Alert]:
     """Check for any alerts based on user data."""
     alerts = []
 
