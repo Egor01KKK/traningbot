@@ -6,16 +6,19 @@ def get_main_menu_keyboard() -> ReplyKeyboardMarkup:
     return ReplyKeyboardMarkup(
         keyboard=[
             [
+                KeyboardButton(text="📊 Итоги сегодня"),
+            ],
+            [
                 KeyboardButton(text="📝 Записать"),
-                KeyboardButton(text="📊 Отчёты"),
-            ],
-            [
                 KeyboardButton(text="🏋️ Тренировка"),
-                KeyboardButton(text="💪 Силовой журнал"),
             ],
             [
-                KeyboardButton(text="⚙️ Настройки"),
                 KeyboardButton(text="📋 Мой план"),
+                KeyboardButton(text="📈 Отчёты"),
+            ],
+            [
+                KeyboardButton(text="💪 Силовой журнал"),
+                KeyboardButton(text="⚙️ Настройки"),
             ],
         ],
         resize_keyboard=True,

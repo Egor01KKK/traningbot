@@ -7,6 +7,7 @@ from bot.db.database import async_session
 from bot.db import crud
 from bot.states import WorkoutStates
 from bot.keyboards.reply import get_workout_type_keyboard, get_main_menu_keyboard
+from bot.utils.formatters import format_workout_balance_response
 
 router = Router()
 
@@ -47,7 +48,7 @@ async def process_duration(message: Message, state: FSMContext):
 
 @router.message(WorkoutStates.waiting_for_calories)
 async def process_workout_calories(message: Message, state: FSMContext):
-    """Process calories burned and save workout."""
+    """Process calories burned and save workout with balance display."""
     try:
         calories = int(message.text.strip())
         if not 0 <= calories <= 5000:
@@ -77,6 +78,9 @@ async def process_workout_calories(message: Message, state: FSMContext):
         )
 
         week_count = await crud.get_workouts_count_this_week(session, user.id, today)
+        calories_eaten = await crud.get_total_calories_for_date(session, user.id, today)
+        total_burned = await crud.get_burned_calories_for_date(session, user.id, today)
+        targets = await crud.get_computed_targets(session, user.id)
 
     workout_names = {
         "gym": "Зал",
@@ -85,16 +89,17 @@ async def process_workout_calories(message: Message, state: FSMContext):
         "other": "Тренировка",
     }
     workout_name = workout_names.get(data["workout_type"], "Тренировка")
+    target = targets.target_calories if targets else None
 
-    response = f"Записал! {workout_name} {data['duration_min']} мин"
-    if calories > 0:
-        response += f", ~{calories} ккал"
-    response += " 🔥"
-
-    if week_count > 0:
-        response += f"\nЭто твоя {week_count}-я тренировка на этой неделе."
-        if week_count >= 3:
-            response += " Красавчик!"
+    response = format_workout_balance_response(
+        workout_name=workout_name,
+        duration=data["duration_min"],
+        calories_burned=calories,
+        calories_eaten=calories_eaten,
+        total_burned=total_burned,
+        target=target,
+        workout_count=week_count,
+    )
 
     await message.answer(response, reply_markup=get_main_menu_keyboard())
     await state.clear()

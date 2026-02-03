@@ -8,6 +8,7 @@ from bot.db.database import async_session
 from bot.db import crud
 from bot.states import LoggingStates
 from bot.keyboards.reply import get_logging_keyboard, get_main_menu_keyboard
+from bot.utils.formatters import format_calorie_entry_response
 
 router = Router()
 
@@ -75,7 +76,7 @@ async def start_calories_logging(message: Message, state: FSMContext):
 
 @router.message(LoggingStates.waiting_for_calories)
 async def process_calories(message: Message, state: FSMContext):
-    """Process calories input."""
+    """Process calories input. Accumulates instead of overwriting."""
     try:
         calories = int(message.text.strip())
         if not 0 <= calories <= 10000:
@@ -94,28 +95,13 @@ async def process_calories(message: Message, state: FSMContext):
             await state.clear()
             return
 
-        await crud.create_or_update_daily_log(
-            session, user.id, today, calories_consumed=calories
-        )
-
+        await crud.create_calorie_entry(session, user.id, today, calories)
+        total_today = await crud.get_total_calories_for_date(session, user.id, today)
+        burned_today = await crud.get_burned_calories_for_date(session, user.id, today)
         targets = await crud.get_computed_targets(session, user.id)
 
-    response = f"Записал! {calories} ккал"
-
-    if targets and targets.target_calories:
-        target = targets.target_calories
-        diff = target - calories
-
-        response += f" из {target} ккал."
-
-        if diff > 0:
-            response += f" Дефицит {diff} ккал — в рамках плана ✅"
-        elif diff < -200:
-            response += f" Профицит {abs(diff)} ккал — многовато 🤔"
-        else:
-            response += " Практически по плану ✅"
-    else:
-        response += "."
+    target = targets.target_calories if targets else None
+    response = format_calorie_entry_response(calories, total_today, target, burned_today)
 
     await message.answer(response, reply_markup=get_logging_keyboard())
     await state.clear()

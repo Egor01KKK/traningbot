@@ -10,6 +10,7 @@ from bot.db.models import (
     Workout,
     StrengthLog,
     Settings,
+    CalorieEntry,
 )
 
 
@@ -211,6 +212,52 @@ async def get_weight_week_ago(
     return result.scalar_one_or_none()
 
 
+# ========== Calorie Entry ==========
+async def create_calorie_entry(
+    session: AsyncSession,
+    user_id: int,
+    entry_date: date,
+    calories: int,
+    description: str | None = None,
+) -> CalorieEntry:
+    entry = CalorieEntry(
+        user_id=user_id,
+        entry_date=entry_date,
+        calories=calories,
+        description=description,
+    )
+    session.add(entry)
+    await session.commit()
+    await session.refresh(entry)
+    return entry
+
+
+async def get_total_calories_for_date(
+    session: AsyncSession, user_id: int, entry_date: date
+) -> int:
+    """Get total consumed calories for a specific date."""
+    result = await session.execute(
+        select(func.sum(CalorieEntry.calories)).where(
+            and_(CalorieEntry.user_id == user_id, CalorieEntry.entry_date == entry_date)
+        )
+    )
+    return result.scalar() or 0
+
+
+async def get_calorie_entries_for_date(
+    session: AsyncSession, user_id: int, entry_date: date
+) -> list[CalorieEntry]:
+    """Get all calorie entries for a specific date."""
+    result = await session.execute(
+        select(CalorieEntry)
+        .where(
+            and_(CalorieEntry.user_id == user_id, CalorieEntry.entry_date == entry_date)
+        )
+        .order_by(CalorieEntry.created_at)
+    )
+    return list(result.scalars().all())
+
+
 # ========== Workout ==========
 async def create_workout(
     session: AsyncSession,
@@ -276,6 +323,32 @@ async def get_last_workout(session: AsyncSession, user_id: int) -> Workout | Non
         .limit(1)
     )
     return result.scalar_one_or_none()
+
+
+async def get_workouts_for_date(
+    session: AsyncSession, user_id: int, workout_date: date
+) -> list[Workout]:
+    """Get all workouts for a specific date."""
+    result = await session.execute(
+        select(Workout)
+        .where(
+            and_(Workout.user_id == user_id, Workout.workout_date == workout_date)
+        )
+        .order_by(Workout.created_at)
+    )
+    return list(result.scalars().all())
+
+
+async def get_burned_calories_for_date(
+    session: AsyncSession, user_id: int, workout_date: date
+) -> int:
+    """Get total burned calories for a specific date."""
+    result = await session.execute(
+        select(func.sum(Workout.calories_burned)).where(
+            and_(Workout.user_id == user_id, Workout.workout_date == workout_date)
+        )
+    )
+    return result.scalar() or 0
 
 
 # ========== Strength Log ==========

@@ -37,6 +37,7 @@ class User(Base):
     daily_logs: Mapped[list["DailyLog"]] = relationship(back_populates="user")
     workouts: Mapped[list["Workout"]] = relationship(back_populates="user")
     strength_logs: Mapped[list["StrengthLog"]] = relationship(back_populates="user")
+    calorie_entries: Mapped[list["CalorieEntry"]] = relationship(back_populates="user")
     settings: Mapped["Settings"] = relationship(back_populates="user", uselist=False)
 
 
@@ -130,6 +131,20 @@ class StrengthLog(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="strength_logs")
+
+
+class CalorieEntry(Base):
+    __tablename__ = "calorie_entries"
+    __table_args__ = (Index("idx_calorie_entries_user_date", "user_id", "entry_date"),)
+
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
+    entry_date: Mapped[date] = mapped_column(Date, nullable=False)
+    calories: Mapped[int] = mapped_column(Integer, nullable=False)
+    description: Mapped[str | None] = mapped_column(String(255))
+    created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
+
+    user: Mapped["User"] = relationship(back_populates="calorie_entries")
 
 
 class Settings(Base):

@@ -1,5 +1,5 @@
 import logging
-from datetime import datetime
+from datetime import datetime, date
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
 from aiogram import Bot
@@ -7,9 +7,10 @@ from aiogram import Bot
 from bot.db.database import async_session
 from bot.db import crud
 from bot.services.analytics import get_weekly_stats
+from bot.services.daily_summary import get_daily_summary
 from bot.services.alerts import check_alerts
 from bot.services.coach import get_coach_comment
-from bot.utils.formatters import format_weekly_report, format_alert
+from bot.utils.formatters import format_weekly_report, format_alert, format_daily_summary
 from bot.keyboards.inline import get_reminder_keyboard, get_alert_keyboard
 from bot.config import config
 
@@ -51,13 +52,14 @@ async def send_weigh_reminder(bot: Bot):
 
 
 async def send_daily_reminder(bot: Bot):
-    """Send daily reminder to users who have it scheduled now."""
+    """Send smart daily summary to users who have it scheduled now."""
     logger.info("Running daily reminder job")
 
     async with async_session() as session:
         users_with_settings = await crud.get_all_users_with_settings(session)
 
     current_time = datetime.now().time()
+    today = date.today()
 
     for user, settings in users_with_settings:
         if abs(
@@ -67,11 +69,19 @@ async def send_daily_reminder(bot: Bot):
             continue
 
         try:
-            await bot.send_message(
-                user.telegram_id,
-                "Как прошёл день? Запиши итоги:",
-                reply_markup=get_reminder_keyboard("daily"),
-            )
+            async with async_session() as summary_session:
+                summary = await get_daily_summary(summary_session, user.id, today)
+
+            if summary.calories_eaten > 0 or summary.workout_count > 0:
+                formatted = format_daily_summary(summary, include_recommendation=True)
+                await bot.send_message(user.telegram_id, formatted)
+            else:
+                await bot.send_message(
+                    user.telegram_id,
+                    "Как прошёл день? Запиши итоги:",
+                    reply_markup=get_reminder_keyboard("daily"),
+                )
+
             logger.info(f"Sent daily reminder to user {user.telegram_id}")
         except Exception as e:
             logger.error(f"Failed to send daily reminder to {user.telegram_id}: {e}")

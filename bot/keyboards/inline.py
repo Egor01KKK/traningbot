@@ -2,10 +2,22 @@ from aiogram.types import InlineKeyboardMarkup, InlineKeyboardButton
 
 
 def get_start_keyboard() -> InlineKeyboardMarkup:
-    """Start onboarding keyboard."""
+    """Start onboarding keyboard with info buttons."""
     return InlineKeyboardMarkup(
         inline_keyboard=[
-            [InlineKeyboardButton(text="Поехали!", callback_data="start_onboarding")],
+            [InlineKeyboardButton(text="🚀 Начать настройку", callback_data="start_onboarding")],
+            [InlineKeyboardButton(text="❓ Что умеет бот?", callback_data="info_features")],
+            [InlineKeyboardButton(text="📖 Как пользоваться?", callback_data="info_howto")],
+        ]
+    )
+
+
+def get_back_to_start_keyboard() -> InlineKeyboardMarkup:
+    """Back to start keyboard."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [InlineKeyboardButton(text="🚀 Начать настройку", callback_data="start_onboarding")],
+            [InlineKeyboardButton(text="◀️ Назад", callback_data="back_to_start")],
         ]
     )
 
@@ -151,6 +163,20 @@ def get_alert_keyboard(alert_type: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(
         inline_keyboard=[
             [InlineKeyboardButton(text="Понял", callback_data="alert_ack")],
+        ]
+    )
+
+
+def get_plan_keyboard() -> InlineKeyboardMarkup:
+    """Plan explanation keyboard."""
+    return InlineKeyboardMarkup(
+        inline_keyboard=[
+            [
+                InlineKeyboardButton(
+                    text="📐 Как это рассчитано?",
+                    callback_data="show_formulas",
+                )
+            ],
         ]
     )
 

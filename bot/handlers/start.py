@@ -9,6 +9,7 @@ from bot.db import crud
 from bot.states import OnboardingStates
 from bot.keyboards.inline import (
     get_start_keyboard,
+    get_back_to_start_keyboard,
     get_gender_keyboard,
     get_activity_keyboard,
     get_goal_keyboard,
@@ -19,6 +20,49 @@ from bot.services.calculator import calculate_targets
 from bot.utils.formatters import format_targets
 
 router = Router()
+
+WELCOME_TEXT = (
+    "👋 Йо! Я *Качалочкин* — твой фитнес-ассистент.\n\n"
+    "Помогу отслеживать питание, тренировки и прогресс. "
+    "Давай настроим профиль, чтобы я мог считать твои калории!"
+)
+
+FEATURES_TEXT = (
+    "🎯 *Что умеет бот:*\n\n"
+    "📊 *Расчёт калорий и макросов*\n"
+    "Персональный план на основе твоих данных (BMR, TDEE)\n\n"
+    "🍽 *Учёт питания*\n"
+    "Записывай калории несколько раз в день — они накапливаются\n\n"
+    "🏋️ *Тренировки*\n"
+    "Записывай тренировки и сожжённые калории\n\n"
+    "💪 *Силовой журнал*\n"
+    "Отслеживай прогресс в упражнениях (e1RM)\n\n"
+    "📈 *Отчёты и графики*\n"
+    "Недельные/месячные отчёты, график веса\n\n"
+    "🔔 *Умные напоминания*\n"
+    "Вечерняя сводка с рекомендациями\n\n"
+    "⚠️ *Алерты*\n"
+    "Предупреждения о слишком быстром похудении или низких калориях"
+)
+
+HOWTO_TEXT = (
+    "📖 *Как пользоваться:*\n\n"
+    "*1. Настрой профиль*\n"
+    "Укажи пол, возраст, рост, вес, активность и цель. "
+    "Бот рассчитает твой план калорий и БЖУ.\n\n"
+    "*2. Записывай данные*\n"
+    "• 🍽 Калории — можно несколько раз в день\n"
+    "• ⚖️ Вес — лучше раз в неделю утром\n"
+    "• 💧 Вода и 😴 сон — по желанию\n\n"
+    "*3. Отмечай тренировки*\n"
+    "Тип, длительность, сожжённые калории.\n\n"
+    "*4. Смотри итоги*\n"
+    "Кнопка «📊 Итоги сегодня» покажет баланс:\n"
+    "съедено - сожжено = нетто калорий\n\n"
+    "*5. Анализируй прогресс*\n"
+    "Недельные отчёты покажут тренд веса и соблюдение плана.\n\n"
+    "💡 *Совет:* Записывай калории сразу после еды — так проще!"
+)
 
 
 @router.message(CommandStart())
@@ -39,11 +83,44 @@ async def cmd_start(message: Message, state: FSMContext):
         await state.clear()
     else:
         await message.answer(
-            "Йо! Я твой фитнес-ассистент. Давай настроим профиль, "
-            "чтобы я мог считать твои калории. Погнали?",
+            WELCOME_TEXT,
             reply_markup=get_start_keyboard(),
+            parse_mode="Markdown",
         )
         await state.set_state(OnboardingStates.waiting_for_start)
+
+
+@router.callback_query(F.data == "info_features")
+async def show_features(callback: CallbackQuery, state: FSMContext):
+    """Show bot features."""
+    await callback.message.edit_text(
+        FEATURES_TEXT,
+        reply_markup=get_back_to_start_keyboard(),
+        parse_mode="Markdown",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "info_howto")
+async def show_howto(callback: CallbackQuery, state: FSMContext):
+    """Show how to use the bot."""
+    await callback.message.edit_text(
+        HOWTO_TEXT,
+        reply_markup=get_back_to_start_keyboard(),
+        parse_mode="Markdown",
+    )
+    await callback.answer()
+
+
+@router.callback_query(F.data == "back_to_start")
+async def back_to_start(callback: CallbackQuery, state: FSMContext):
+    """Go back to start screen."""
+    await callback.message.edit_text(
+        WELCOME_TEXT,
+        reply_markup=get_start_keyboard(),
+        parse_mode="Markdown",
+    )
+    await callback.answer()
 
 
 @router.callback_query(F.data == "start_onboarding")

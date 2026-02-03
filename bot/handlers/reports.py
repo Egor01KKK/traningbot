@@ -2,15 +2,33 @@ from aiogram import Router, F
 from aiogram.types import Message, BufferedInputFile
 from aiogram.fsm.context import FSMContext
 
+from datetime import date
+
 from bot.db.database import async_session
 from bot.db import crud
 from bot.services.analytics import get_weekly_stats, get_monthly_stats, get_weight_trend
+from bot.services.daily_summary import get_daily_summary
 from bot.services.coach import get_coach_comment
 from bot.utils.plotting import create_weight_chart
-from bot.utils.formatters import format_weekly_report, format_monthly_report
+from bot.utils.formatters import format_weekly_report, format_monthly_report, format_daily_summary
 from bot.keyboards.reply import get_reports_keyboard, get_main_menu_keyboard
 
 router = Router()
+
+
+@router.message(F.text == "📊 Итоги сегодня")
+async def show_today_summary(message: Message, state: FSMContext):
+    """Show today's summary in one click."""
+    async with async_session() as session:
+        user = await crud.get_user_by_telegram_id(session, message.from_user.id)
+        if not user:
+            await message.answer("Ошибка. Попробуй /start")
+            return
+
+        summary = await get_daily_summary(session, user.id, date.today())
+
+    formatted = format_daily_summary(summary, include_recommendation=True)
+    await message.answer(formatted, reply_markup=get_main_menu_keyboard())
 
 
 @router.message(F.text == "📈 График веса")
