@@ -1,5 +1,6 @@
 from datetime import date, datetime, timedelta
 from decimal import Decimal
+from typing import Optional, List, Tuple
 from sqlalchemy import select, func, and_
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.db.models import (
@@ -15,7 +16,7 @@ from bot.db.models import (
 
 
 # ========== User ==========
-async def get_user_by_telegram_id(session: AsyncSession, telegram_id: int) -> User | None:
+async def get_user_by_telegram_id(session: AsyncSession, telegram_id: int) -> Optional[User]:
     result = await session.execute(
         select(User).where(User.telegram_id == telegram_id)
     )
@@ -23,7 +24,7 @@ async def get_user_by_telegram_id(session: AsyncSession, telegram_id: int) -> Us
 
 
 async def create_user(
-    session: AsyncSession, telegram_id: int, username: str | None = None
+    session: AsyncSession, telegram_id: int, username: Optional[str] = None
 ) -> User:
     user = User(telegram_id=telegram_id, username=username)
     session.add(user)
@@ -33,7 +34,7 @@ async def create_user(
 
 
 async def get_or_create_user(
-    session: AsyncSession, telegram_id: int, username: str | None = None
+    session: AsyncSession, telegram_id: int, username: Optional[str] = None
 ) -> tuple[User, bool]:
     user = await get_user_by_telegram_id(session, telegram_id)
     if user:
@@ -43,7 +44,7 @@ async def get_or_create_user(
 
 
 # ========== Profile ==========
-async def get_profile(session: AsyncSession, user_id: int) -> Profile | None:
+async def get_profile(session: AsyncSession, user_id: int) -> Optional[Profile]:
     result = await session.execute(select(Profile).where(Profile.user_id == user_id))
     return result.scalar_one_or_none()
 
@@ -51,13 +52,13 @@ async def get_profile(session: AsyncSession, user_id: int) -> Profile | None:
 async def create_or_update_profile(
     session: AsyncSession,
     user_id: int,
-    gender: str | None = None,
-    age: int | None = None,
-    height_cm: int | None = None,
-    current_weight_kg: Decimal | None = None,
-    activity_level: str | None = None,
-    goal: str | None = None,
-    goal_speed: str | None = None,
+    gender: Optional[str] = None,
+    age: Optional[int] = None,
+    height_cm: Optional[int] = None,
+    current_weight_kg: Optional[Decimal] = None,
+    activity_level: Optional[str] = None,
+    goal: Optional[str] = None,
+    goal_speed: Optional[str] = None,
 ) -> Profile:
     profile = await get_profile(session, user_id)
     if not profile:
@@ -86,7 +87,7 @@ async def create_or_update_profile(
 
 
 # ========== Computed Targets ==========
-async def get_computed_targets(session: AsyncSession, user_id: int) -> ComputedTargets | None:
+async def get_computed_targets(session: AsyncSession, user_id: int) -> Optional[ComputedTargets]:
     result = await session.execute(
         select(ComputedTargets).where(ComputedTargets.user_id == user_id)
     )
@@ -126,7 +127,7 @@ async def create_or_update_computed_targets(
 # ========== Daily Log ==========
 async def get_daily_log(
     session: AsyncSession, user_id: int, log_date: date
-) -> DailyLog | None:
+) -> Optional[DailyLog]:
     result = await session.execute(
         select(DailyLog).where(
             and_(DailyLog.user_id == user_id, DailyLog.log_date == log_date)
@@ -139,11 +140,11 @@ async def create_or_update_daily_log(
     session: AsyncSession,
     user_id: int,
     log_date: date,
-    weight_kg: Decimal | None = None,
-    calories_consumed: int | None = None,
-    water_ml: int | None = None,
-    sleep_hours: Decimal | None = None,
-    notes: str | None = None,
+    weight_kg: Optional[Decimal] = None,
+    calories_consumed: Optional[int] = None,
+    water_ml: Optional[int] = None,
+    sleep_hours: Optional[Decimal] = None,
+    notes: Optional[str] = None,
 ) -> DailyLog:
     log = await get_daily_log(session, user_id, log_date)
     if not log:
@@ -183,7 +184,7 @@ async def get_daily_logs_range(
     return list(result.scalars().all())
 
 
-async def get_last_weight_log(session: AsyncSession, user_id: int) -> DailyLog | None:
+async def get_last_weight_log(session: AsyncSession, user_id: int) -> Optional[DailyLog]:
     result = await session.execute(
         select(DailyLog)
         .where(and_(DailyLog.user_id == user_id, DailyLog.weight_kg.isnot(None)))
@@ -195,7 +196,7 @@ async def get_last_weight_log(session: AsyncSession, user_id: int) -> DailyLog |
 
 async def get_weight_week_ago(
     session: AsyncSession, user_id: int, current_date: date
-) -> DailyLog | None:
+) -> Optional[DailyLog]:
     week_ago = current_date - timedelta(days=7)
     result = await session.execute(
         select(DailyLog)
@@ -218,7 +219,7 @@ async def create_calorie_entry(
     user_id: int,
     entry_date: date,
     calories: int,
-    description: str | None = None,
+    description: Optional[str] = None,
 ) -> CalorieEntry:
     entry = CalorieEntry(
         user_id=user_id,
@@ -264,9 +265,9 @@ async def create_workout(
     user_id: int,
     workout_date: date,
     workout_type: str,
-    duration_min: int | None = None,
-    calories_burned: int | None = None,
-    notes: str | None = None,
+    duration_min: Optional[int] = None,
+    calories_burned: Optional[int] = None,
+    notes: Optional[str] = None,
 ) -> Workout:
     workout = Workout(
         user_id=user_id,
@@ -315,7 +316,7 @@ async def get_workouts_count_this_week(
     return result.scalar() or 0
 
 
-async def get_last_workout(session: AsyncSession, user_id: int) -> Workout | None:
+async def get_last_workout(session: AsyncSession, user_id: int) -> Optional[Workout]:
     result = await session.execute(
         select(Workout)
         .where(Workout.user_id == user_id)
@@ -361,7 +362,7 @@ async def create_strength_log(
     reps: int,
     sets: int,
     e1rm: Decimal,
-    notes: str | None = None,
+    notes: Optional[str] = None,
 ) -> StrengthLog:
     log = StrengthLog(
         user_id=user_id,
@@ -398,7 +399,7 @@ async def get_strength_logs_by_exercise(
 
 async def get_last_strength_log_for_exercise(
     session: AsyncSession, user_id: int, exercise_name: str
-) -> StrengthLog | None:
+) -> Optional[StrengthLog]:
     result = await session.execute(
         select(StrengthLog)
         .where(
@@ -425,7 +426,7 @@ async def get_user_exercises(session: AsyncSession, user_id: int, limit: int = 1
 
 
 # ========== Settings ==========
-async def get_settings(session: AsyncSession, user_id: int) -> Settings | None:
+async def get_settings(session: AsyncSession, user_id: int) -> Optional[Settings]:
     result = await session.execute(
         select(Settings).where(Settings.user_id == user_id)
     )

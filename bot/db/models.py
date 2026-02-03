@@ -1,5 +1,6 @@
 from datetime import datetime, date, time
 from decimal import Decimal
+from typing import Optional, List, TYPE_CHECKING
 from sqlalchemy import (
     BigInteger,
     Boolean,
@@ -26,7 +27,7 @@ class User(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     telegram_id: Mapped[int] = mapped_column(BigInteger, unique=True, nullable=False)
-    username: Mapped[str | None] = mapped_column(String(255))
+    username: Mapped[Optional[str]] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
 
@@ -46,13 +47,13 @@ class Profile(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
-    gender: Mapped[str | None] = mapped_column(String(10))
-    age: Mapped[int | None] = mapped_column(Integer)
-    height_cm: Mapped[int | None] = mapped_column(Integer)
-    current_weight_kg: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-    activity_level: Mapped[str | None] = mapped_column(String(20))
-    goal: Mapped[str | None] = mapped_column(String(20))
-    goal_speed: Mapped[str | None] = mapped_column(String(20))
+    gender: Mapped[Optional[str]] = mapped_column(String(10))
+    age: Mapped[Optional[int]] = mapped_column(Integer)
+    height_cm: Mapped[Optional[int]] = mapped_column(Integer)
+    current_weight_kg: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2))
+    activity_level: Mapped[Optional[str]] = mapped_column(String(20))
+    goal: Mapped[Optional[str]] = mapped_column(String(20))
+    goal_speed: Mapped[Optional[str]] = mapped_column(String(20))
     updated_at: Mapped[datetime] = mapped_column(
         DateTime, default=datetime.utcnow, onupdate=datetime.utcnow
     )
@@ -65,13 +66,13 @@ class ComputedTargets(Base):
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"), unique=True)
-    bmr: Mapped[int | None] = mapped_column(Integer)
-    tdee: Mapped[int | None] = mapped_column(Integer)
-    target_calories: Mapped[int | None] = mapped_column(Integer)
-    protein_g: Mapped[int | None] = mapped_column(Integer)
-    fat_g: Mapped[int | None] = mapped_column(Integer)
-    carbs_g: Mapped[int | None] = mapped_column(Integer)
-    deficit_percent: Mapped[Decimal | None] = mapped_column(Numeric(4, 2))
+    bmr: Mapped[Optional[int]] = mapped_column(Integer)
+    tdee: Mapped[Optional[int]] = mapped_column(Integer)
+    target_calories: Mapped[Optional[int]] = mapped_column(Integer)
+    protein_g: Mapped[Optional[int]] = mapped_column(Integer)
+    fat_g: Mapped[Optional[int]] = mapped_column(Integer)
+    carbs_g: Mapped[Optional[int]] = mapped_column(Integer)
+    deficit_percent: Mapped[Optional[Decimal]] = mapped_column(Numeric(4, 2))
     calculated_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="computed_targets")
@@ -87,11 +88,11 @@ class DailyLog(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     log_date: Mapped[date] = mapped_column(Date, nullable=False)
-    weight_kg: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-    calories_consumed: Mapped[int | None] = mapped_column(Integer)
-    water_ml: Mapped[int | None] = mapped_column(Integer)
-    sleep_hours: Mapped[Decimal | None] = mapped_column(Numeric(3, 1))
-    notes: Mapped[str | None] = mapped_column(Text)
+    weight_kg: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2))
+    calories_consumed: Mapped[Optional[int]] = mapped_column(Integer)
+    water_ml: Mapped[Optional[int]] = mapped_column(Integer)
+    sleep_hours: Mapped[Optional[Decimal]] = mapped_column(Numeric(3, 1))
+    notes: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="daily_logs")
@@ -104,10 +105,10 @@ class Workout(Base):
     id: Mapped[int] = mapped_column(Integer, primary_key=True)
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     workout_date: Mapped[date] = mapped_column(Date, nullable=False)
-    workout_type: Mapped[str | None] = mapped_column(String(20))
-    duration_min: Mapped[int | None] = mapped_column(Integer)
-    calories_burned: Mapped[int | None] = mapped_column(Integer)
-    notes: Mapped[str | None] = mapped_column(Text)
+    workout_type: Mapped[Optional[str]] = mapped_column(String(20))
+    duration_min: Mapped[Optional[int]] = mapped_column(Integer)
+    calories_burned: Mapped[Optional[int]] = mapped_column(Integer)
+    notes: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="workouts")
@@ -123,11 +124,11 @@ class StrengthLog(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     log_date: Mapped[date] = mapped_column(Date, nullable=False)
     exercise_name: Mapped[str] = mapped_column(String(100), nullable=False)
-    weight_kg: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-    reps: Mapped[int | None] = mapped_column(Integer)
-    sets: Mapped[int | None] = mapped_column(Integer)
-    e1rm: Mapped[Decimal | None] = mapped_column(Numeric(5, 2))
-    notes: Mapped[str | None] = mapped_column(Text)
+    weight_kg: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2))
+    reps: Mapped[Optional[int]] = mapped_column(Integer)
+    sets: Mapped[Optional[int]] = mapped_column(Integer)
+    e1rm: Mapped[Optional[Decimal]] = mapped_column(Numeric(5, 2))
+    notes: Mapped[Optional[str]] = mapped_column(Text)
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="strength_logs")
@@ -141,7 +142,7 @@ class CalorieEntry(Base):
     user_id: Mapped[int] = mapped_column(ForeignKey("users.id"))
     entry_date: Mapped[date] = mapped_column(Date, nullable=False)
     calories: Mapped[int] = mapped_column(Integer, nullable=False)
-    description: Mapped[str | None] = mapped_column(String(255))
+    description: Mapped[Optional[str]] = mapped_column(String(255))
     created_at: Mapped[datetime] = mapped_column(DateTime, default=datetime.utcnow)
 
     user: Mapped["User"] = relationship(back_populates="calorie_entries")

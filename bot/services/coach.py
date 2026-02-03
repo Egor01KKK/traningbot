@@ -1,4 +1,5 @@
 import logging
+from typing import Optional
 from openai import AsyncOpenAI
 from bot.config import config
 from bot.services.analytics import WeeklyStats
@@ -6,7 +7,7 @@ from bot.services.analytics import WeeklyStats
 logger = logging.getLogger(__name__)
 
 
-async def get_coach_comment(stats: WeeklyStats, use_ai: bool = True) -> str | None:
+async def get_coach_comment(stats: WeeklyStats, use_ai: bool = True) -> Optional[str]:
     """
     Generate AI coach comment for weekly report.
 

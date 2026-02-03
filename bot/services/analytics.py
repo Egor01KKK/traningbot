@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.db import crud
 
@@ -9,15 +10,15 @@ from bot.db import crud
 class WeeklyStats:
     start_date: date
     end_date: date
-    start_weight: Decimal | None
-    end_weight: Decimal | None
-    weight_change: Decimal | None
-    weight_change_pct: Decimal | None
-    avg_calories: int | None
-    target_calories: int | None
-    calories_deficit: int | None
-    avg_water_ml: int | None
-    avg_sleep_hours: Decimal | None
+    start_weight: Optional[Decimal]
+    end_weight: Optional[Decimal]
+    weight_change: Optional[Decimal]
+    weight_change_pct: Optional[Decimal]
+    avg_calories: Optional[int]
+    target_calories: Optional[int]
+    calories_deficit: Optional[int]
+    avg_water_ml: Optional[int]
+    avg_sleep_hours: Optional[Decimal]
     workout_count: int
     planned_workouts: int
     streak_weeks: int
@@ -27,11 +28,11 @@ class WeeklyStats:
 class MonthlyStats:
     start_date: date
     end_date: date
-    start_weight: Decimal | None
-    end_weight: Decimal | None
-    weight_change: Decimal | None
-    weight_change_pct: Decimal | None
-    avg_calories: int | None
+    start_weight: Optional[Decimal]
+    end_weight: Optional[Decimal]
+    weight_change: Optional[Decimal]
+    weight_change_pct: Optional[Decimal]
+    avg_calories: Optional[int]
     total_workouts: int
     weeks_with_data: int
 
@@ -60,7 +61,7 @@ class ExerciseProgress:
 async def get_weekly_stats(
     session: AsyncSession,
     user_id: int,
-    end_date: date | None = None,
+    end_date: Optional[date] = None,
 ) -> WeeklyStats:
     """Get statistics for the week ending on end_date."""
     if end_date is None:
@@ -115,7 +116,7 @@ async def get_weekly_stats(
 async def get_monthly_stats(
     session: AsyncSession,
     user_id: int,
-    end_date: date | None = None,
+    end_date: Optional[date] = None,
 ) -> MonthlyStats:
     """Get statistics for the month ending on end_date."""
     if end_date is None:
@@ -193,7 +194,7 @@ async def get_exercise_progress(
     user_id: int,
     exercise_name: str,
     weeks: int = 8,
-) -> ExerciseProgress | None:
+) -> Optional[ExerciseProgress]:
     """Get progress data for a specific exercise."""
     logs = await crud.get_strength_logs_by_exercise(
         session, user_id, exercise_name, limit=weeks * 3

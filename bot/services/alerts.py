@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date, timedelta
 from decimal import Decimal
+from typing import Optional, List
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.db import crud
 
@@ -50,7 +51,7 @@ async def _check_rapid_weight_loss(
     session: AsyncSession,
     user_id: int,
     threshold_pct: Decimal,
-) -> Alert | None:
+) -> Optional[Alert]:
     """Check if weight loss is too rapid."""
     today = date.today()
     current_log = await crud.get_last_weight_log(session, user_id)
@@ -89,7 +90,7 @@ async def _check_low_calories(
     user_id: int,
     target_calories: int,
     threshold_pct: Decimal,
-) -> Alert | None:
+) -> Optional[Alert]:
     """Check if calories are consistently too low."""
     today = date.today()
     start_date = today - timedelta(days=2)
@@ -120,7 +121,7 @@ async def _check_low_calories(
 async def _check_missed_workouts(
     session: AsyncSession,
     user_id: int,
-) -> Alert | None:
+) -> Optional[Alert]:
     """Check if user has missed workouts for too long."""
     last_workout = await crud.get_last_workout(session, user_id)
 

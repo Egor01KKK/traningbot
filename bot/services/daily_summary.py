@@ -1,6 +1,7 @@
 from dataclasses import dataclass
 from datetime import date
 from decimal import Decimal
+from typing import Optional
 from sqlalchemy.ext.asyncio import AsyncSession
 from bot.db import crud
 
@@ -11,18 +12,18 @@ class DailySummary:
     calories_eaten: int
     calories_burned: int
     calories_net: int
-    target_calories: int | None
-    delta: int | None
-    percent_of_target: int | None
+    target_calories: Optional[int]
+    delta: Optional[int]
+    percent_of_target: Optional[int]
     workout_count: int
-    water_ml: int | None
-    sleep_hours: Decimal | None
+    water_ml: Optional[int]
+    sleep_hours: Optional[Decimal]
 
 
 async def get_daily_summary(
     session: AsyncSession,
     user_id: int,
-    summary_date: date | None = None,
+    summary_date: Optional[date] = None,
 ) -> DailySummary:
     """Get comprehensive daily summary for a user."""
     if summary_date is None:

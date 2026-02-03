@@ -1,3 +1,4 @@
+from typing import Optional
 from bot.services.calculator import NutritionTargets
 from bot.services.analytics import WeeklyStats, MonthlyStats
 from bot.services.alerts import Alert
@@ -24,7 +25,7 @@ def format_targets(targets: NutritionTargets, weight_kg: float) -> str:
     )
 
 
-def format_weekly_report(stats: WeeklyStats, coach_comment: str | None = None) -> str:
+def format_weekly_report(stats: WeeklyStats, coach_comment: Optional[str] = None) -> str:
     """Format weekly report for display."""
     parts = [
         f"📊 Отчёт за неделю ({stats.start_date.strftime('%d.%m')} - {stats.end_date.strftime('%d.%m')}):",
@@ -168,7 +169,7 @@ def format_daily_summary(summary: DailySummary, include_recommendation: bool = T
 def format_calorie_entry_response(
     calories: int,
     total_today: int,
-    target: int | None,
+    target: Optional[int],
     burned: int = 0,
 ) -> str:
     """Format response after logging calories."""
@@ -204,7 +205,7 @@ def format_workout_balance_response(
     calories_burned: int,
     calories_eaten: int,
     total_burned: int,
-    target: int | None,
+    target: Optional[int],
     workout_count: int,
 ) -> str:
     """Format response after logging workout with balance."""
