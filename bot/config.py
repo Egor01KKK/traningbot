@@ -1,5 +1,6 @@
 import os
 from dataclasses import dataclass
+from typing import Optional
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -17,7 +18,7 @@ class DatabaseConfig:
 
 @dataclass
 class OpenAIConfig:
-    api_key: str | None
+    api_key: Optional[str]
     model: str
 
 
