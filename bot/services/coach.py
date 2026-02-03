@@ -1,6 +1,13 @@
 import logging
 from typing import Optional
-from openai import AsyncOpenAI
+
+try:
+    from openai import AsyncOpenAI
+    OPENAI_AVAILABLE = True
+except ImportError:
+    OPENAI_AVAILABLE = False
+    AsyncOpenAI = None
+
 from bot.config import config
 from bot.services.analytics import WeeklyStats
 
@@ -13,7 +20,7 @@ async def get_coach_comment(stats: WeeklyStats, use_ai: bool = True) -> Optional
 
     Returns None if AI is disabled or unavailable.
     """
-    if not use_ai or not config.openai.api_key:
+    if not OPENAI_AVAILABLE or not use_ai or not config.openai.api_key:
         return None
 
     try:
